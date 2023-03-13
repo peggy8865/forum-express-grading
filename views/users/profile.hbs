@@ -9,9 +9,9 @@
         <h5 class="card-title fw-bold">{{user.name}}</h5>
         <p class="card-text">{{user.email}}</p>
         <p class="card-text">{{commentCounts}} 已評論餐廳</p>
-        {{!-- {{#if user.editable}} // 會導致測試無法通過，暫時刪除 --}}
+        {{#if editable}}
         <a href="/users/{{user.id}}/edit" class="btn btn-primary">Edit</a>
-        {{!-- {{/if}} --}}
+        {{/if}}
       </div>
     </div>
   </div>

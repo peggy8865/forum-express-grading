@@ -1,5 +1,6 @@
 const { Restaurant, Category, Comment, User } = require('../models')
 const { getOffset, getPagination } = require('../helpers/pagination-helper')
+const { getUser } = require('../helpers/auth-helpers')
 
 const restaurantController = {
   getRestaurants: (req, res, next) => {
@@ -21,8 +22,8 @@ const restaurantController = {
       Category.findAll({ raw: true })
     ])
       .then(([restaurants, categories]) => {
-        const favoritedRestaurantsId = req.user && req.user.FavoritedRestaurants.map(fr => fr.id)
-        const likedRestaurantsId = req.user && req.user.LikedRestaurants.map(lr => lr.id)
+        const favoritedRestaurantsId = getUser(req) && getUser(req).FavoritedRestaurants.map(fr => fr.id)
+        const likedRestaurantsId = getUser(req) && getUser(req).LikedRestaurants.map(lr => lr.id)
         const data = restaurants.rows.map(r => ({
           ...r,
           description: r.description.substring(0, 50),
@@ -54,8 +55,8 @@ const restaurantController = {
     })
       .then(restaurant => {
         if (!restaurant) throw new Error("Restaurant doesn't exist!")
-        const isFavorited = restaurant.FavoritedUsers.some(f => f.id === req.user.id)
-        const isLiked = restaurant.LikedUsers.some(l => l.id === req.user.id)
+        const isFavorited = restaurant.FavoritedUsers.some(f => f.id === getUser(req).id)
+        const isLiked = restaurant.LikedUsers.some(l => l.id === getUser(req).id)
         res.render('restaurant', {
           restaurant: restaurant.toJSON(),
           isFavorited,
@@ -108,7 +109,7 @@ const restaurantController = {
           .map(r => ({
             ...r.toJSON(),
             favoritedCount: r.FavoritedUsers.length,
-            isFavorited: req.user && req.user.FavoritedRestaurants.map(fr => fr.id).includes(r.id) // includes 以前的值若存放於外面的變數，測試將無法通過，req.user = undefined
+            isFavorited: getUser(req) && getUser(req).FavoritedRestaurants.map(fr => fr.id).includes(r.id)
           }))
           .sort((a, b) => b.favoritedCount - a.favoritedCount)
           .slice(0, 10)

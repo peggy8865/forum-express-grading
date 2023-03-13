@@ -1,5 +1,6 @@
 const bcrypt = require('bcryptjs')
 const { User, Comment, Restaurant, Favorite, Like, Followship } = require('../models')
+const { getUser } = require('../helpers/auth-helpers')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 
 const userController = {
@@ -48,11 +49,11 @@ const userController = {
     ])
       .then(([user, comments]) => {
         if (!user) throw new Error("User doesn't exist!")
-        // user.editable = user.id === req.user.id // 會導致測試無法通過，暫時刪除
         res.render('users/profile', {
           user,
           commentCounts: comments.count || 0,
-          comments: comments.rows || null
+          comments: comments.rows || null,
+          editable: user.id === getUser(req).id
         })
       })
       .catch(err => next(err))
@@ -92,7 +93,7 @@ const userController = {
       Restaurant.findByPk(restaurantId),
       Favorite.findOne({
         where: {
-          userId: req.user.id,
+          userId: getUser(req).id,
           restaurantId
         }
       })
@@ -101,7 +102,7 @@ const userController = {
         if (!restaurant) throw new Error("Restaurant doesn't exist!")
         if (favorite) throw new Error('You have already added it to favorite!')
         return Favorite.create({
-          userId: req.user.id,
+          userId: getUser(req).id,
           restaurantId
         })
       })
@@ -111,7 +112,7 @@ const userController = {
   removeFavorite: (req, res, next) => {
     return Favorite.findOne({
       where: {
-        userId: req.user.id,
+        userId: getUser(req).id,
         restaurantId: req.params.restaurantId
       }
     })
@@ -128,7 +129,7 @@ const userController = {
       Restaurant.findByPk(restaurantId),
       Like.findOne({
         where: {
-          userId: req.user.id,
+          userId: getUser(req).id,
           restaurantId
         }
       })
@@ -137,7 +138,7 @@ const userController = {
         if (!restaurant) throw new Error("Restaurant doesn't exist!")
         if (like) throw new Error('You have already liked this restaurant!')
         return Like.create({
-          userId: req.user.id,
+          userId: getUser(req).id,
           restaurantId
         })
       })
@@ -147,7 +148,7 @@ const userController = {
   removeLike: (req, res, next) => {
     return Like.findOne({
       where: {
-        userId: req.user.id,
+        userId: getUser(req).id,
         restaurantId: req.params.restaurantId
       }
     })
@@ -167,7 +168,7 @@ const userController = {
           .map(user => ({
             ...user.toJSON(),
             followerCount: user.Followers.length,
-            isFollowed: req.user.Followings.some(f => f.id === user.id)
+            isFollowed: getUser(req).Followings.some(f => f.id === user.id)
           }))
           .sort((a, b) => b.followerCount - a.followerCount)
         res.render('top-users', { users: result })
@@ -180,7 +181,7 @@ const userController = {
       User.findByPk(userId),
       Followship.findOne({
         where: {
-          followerId: req.user.id,
+          followerId: getUser(req).id,
           followingId: userId
         }
       })
@@ -189,7 +190,7 @@ const userController = {
         if (!user) throw new Error("User doesn't exist!")
         if (followship) throw new Error('You are already following this user!')
         return Followship.create({
-          followerId: req.user.id,
+          followerId: getUser(req).id,
           followingId: userId
         })
       })
@@ -199,7 +200,7 @@ const userController = {
   removeFollowing: (req, res, next) => {
     return Followship.findOne({
       where: {
-        followerId: req.user.id,
+        followerId: getUser(req).id,
         followingId: req.params.userId
       }
     })
