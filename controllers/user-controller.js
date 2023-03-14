@@ -197,7 +197,8 @@ const userController = {
       .catch(err => next(err))
   },
   addFollowing: (req, res, next) => {
-    const { userId } = req.params
+    const userId = Number(req.params.userId)
+    if (userId === getUser(req).id) throw new Error('Self-following is not allowed.')
     return Promise.all([
       User.findByPk(userId),
       Followship.findOne({
