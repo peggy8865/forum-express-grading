@@ -39,8 +39,15 @@ const userController = {
   getUser: (req, res, next) => {
     const userId = req.params.id
     return Promise.all([
-      User.findByPk(userId, { raw: true }),
-      Comment.findAndCountAll({
+      User.findOne({ // 用 nest: true 只能抓到第一家餐廳?
+        include: [
+          { model: Restaurant, as: 'FavoritedRestaurants' },
+          { model: User, as: 'Followings' },
+          { model: User, as: 'Followers' }
+        ],
+        where: { id: userId }
+      }),
+      Comment.findAll({
         include: Restaurant,
         nest: true,
         raw: true,
@@ -49,10 +56,24 @@ const userController = {
     ])
       .then(([user, comments]) => {
         if (!user) throw new Error("User doesn't exist!")
+        user = user.toJSON()
+        const newComments = []
+        if (comments) {
+          comments.forEach(c => {
+            if (newComments.some(nc => nc.restaurantId === c.restaurantId)) return
+            newComments.push(c)
+          })
+        }
         res.render('users/profile', {
           user,
-          commentCounts: comments.count || 0,
-          comments: comments.rows || null,
+          commentCounts: newComments.length || 0,
+          comments: comments && newComments,
+          favoriteCounts: user.FavoritedRestaurants.length || 0,
+          favorites: user.FavoritedRestaurants || null,
+          followingCounts: user.Followings.length || 0,
+          followings: user.Followings || null,
+          followerCounts: user.Followers.length || 0,
+          followers: user.Followers || null,
           editable: user.id === getUser(req).id
         })
       })

@@ -8,7 +8,12 @@
       <div class="card-body">
         <h5 class="card-title fw-bold">{{user.name}}</h5>
         <p class="card-text">{{user.email}}</p>
-        <p class="card-text">{{commentCounts}} 已評論餐廳</p>
+        <p class="card-text">
+          <strong>{{commentCounts}}</strong> 已評論餐廳<br>
+          <strong>{{favoriteCounts}}</strong> 收藏的餐廳<br>
+          <strong>{{followingCounts}}</strong> followings (追蹤者)<br>
+          <strong>{{followerCounts}}</strong> followers (追隨者)
+        </p>
         {{#if editable}}
         <a href="/users/{{user.id}}/edit" class="btn btn-primary">Edit</a>
         {{/if}}
@@ -16,16 +21,62 @@
     </div>
   </div>
 </div>
-{{!-- Comment --}}
-<div class="card">
-  <div class="card-header fw-bold">{{commentCounts}} 已評論餐廳</div>
-  <div class="card-body p-4">
-    {{#if comments}}
-    {{#each comments}}
-    <a href="/restaurants/{{this.restaurantId}}" class="d-inline-flex me-4">
-      <img class="img-responsive center-block" src="{{this.Restaurant.image}}" style="width: 100px;">
-    </a>
-    {{/each}}
-    {{/if}}
+
+<div class="row">
+  <div class="col-md-4">
+    {{!-- Followings --}}
+    <div class="card mb-3">
+      <div class="card-header fw-bold">{{followingCounts}} followings (追蹤者)</div>
+      <div class="card-body p-4">
+        {{#if followings}}
+        {{#each followings}}
+        <a href="/users/{{this.id}}" class="d-inline-flex me-4">
+          <img class="img-responsive center-block" src="{{#if this.image}}{{this.image}}{{else}}https://fakeimg.pl/100/{{/if}}" style="width: 100px;">
+        </a>
+        {{/each}}
+        {{/if}}
+      </div>
+    </div>
+    {{!-- Followers --}}
+    <div class="card mb-3">
+      <div class="card-header fw-bold">{{followerCounts}} followers (追隨者)</div>
+      <div class="card-body p-4">
+        {{#if followers}}
+        {{#each followers}}
+        <a href="/users/{{this.id}}" class="d-inline-flex me-4">
+          <img class="img-responsive center-block" src="{{#if this.image}}{{this.image}}{{else}}https://fakeimg.pl/100/{{/if}}" style="width: 100px;">
+        </a>
+        {{/each}}
+        {{/if}}
+      </div>
+    </div>
+  </div>
+  <div class="col-md-8">
+    {{!-- Comment --}}
+    <div class="card mb-3">
+      <div class="card-header fw-bold">{{commentCounts}} 已評論餐廳</div>
+      <div class="card-body p-4">
+        {{#if comments}}
+        {{#each comments}}
+        <a href="/restaurants/{{this.restaurantId}}" class="d-inline-flex me-4">
+          <img class="img-responsive center-block" src="{{this.Restaurant.image}}" style="width: 100px;">
+        </a>
+        {{/each}}
+        {{/if}}
+      </div>
+    </div>
+    {{!-- Favorite --}}
+    <div class="card mb-3">
+      <div class="card-header fw-bold">{{favoriteCounts}} 收藏的餐廳</div>
+      <div class="card-body p-4">
+        {{#if favorites}}
+        {{#each favorites}}
+        <a href="/restaurants/{{this.id}}" class="d-inline-flex me-4">
+          <img class="img-responsive center-block" src="{{this.image}}" style="width: 100px;">
+        </a>
+        {{/each}}
+        {{/if}}
+      </div>
+    </div>
   </div>
 </div>
