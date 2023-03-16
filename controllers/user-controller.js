@@ -57,22 +57,21 @@ const userController = {
       .then(([user, comments]) => {
         if (!user) throw new Error("User doesn't exist!")
         user = user.toJSON()
-        const newComments = []
-        if (comments) {
-          comments.forEach(c => {
-            if (newComments.some(nc => nc.restaurantId === c.restaurantId)) return
-            newComments.push(c)
-          })
-        }
+        const uniqueComments = {}
+        comments.forEach(c => {
+          uniqueComments[c.restaurantId] = c
+        })
+        const filteredComments = Object.values(uniqueComments)
+
         res.render('users/profile', {
           user,
-          commentCounts: newComments.length || 0,
-          comments: comments && newComments,
-          favoriteCounts: user.FavoritedRestaurants.length || 0,
+          commentCounts: filteredComments?.length || 0,
+          comments: comments && filteredComments,
+          favoriteCounts: user.FavoritedRestaurants?.length || 0,
           favorites: user.FavoritedRestaurants || null,
-          followingCounts: user.Followings.length || 0,
+          followingCounts: user.Followings?.length || 0,
           followings: user.Followings || null,
-          followerCounts: user.Followers.length || 0,
+          followerCounts: user.Followers?.length || 0,
           followers: user.Followers || null,
           editable: user.id === getUser(req).id
         })
